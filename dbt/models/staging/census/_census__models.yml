@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: stg_census__acs5_tract
+    columns:
+      - name: tract_geoid
+        data_tests: [unique, not_null]
+      - name: renter_share
+        data_tests:
+          - value_between:
+              arguments: {min_value: 0, max_value: 1}

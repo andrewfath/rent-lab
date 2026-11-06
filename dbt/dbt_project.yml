@@ -1,0 +1,44 @@
+name: rent_lab
+version: "0.1.0"
+config-version: 2
+profile: rent_lab
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets: ["target", "logs"]
+
+vars:
+  # Markets to build. Market-specific staging models are enabled per market.
+  markets: ["chicago"]
+  # Label rules for completed rental listings
+  max_days_on_market: 120
+  min_rent: 300
+  max_rent: 20000
+  # Listing-to-parcel matching
+  max_match_distance_m: 40
+  min_parcel_match_rate: 0.85
+  # Comparables
+  comps_radius_mi: 0.75
+  comps_lookback_days: 365
+  comps_max: 10
+  # Location features
+  amenity_radius_mi: 0.25
+
+models:
+  rent_lab:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: table
+    marts:
+      +materialized: table
+
+seeds:
+  rent_lab:
+    markets:
+      +column_types:
+        market_id: varchar
+        county_fips: varchar

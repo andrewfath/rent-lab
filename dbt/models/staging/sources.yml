@@ -1,0 +1,59 @@
+version: 2
+
+# Raw Parquet landed by `rentlab extract ...`, read in place by DuckDB.
+# {name} is replaced with the table name; hive partitioning exposes `pulled_at`.
+
+sources:
+  - name: rentcast
+    description: RentCast listings API. Each weekly/one-off pull is a dated snapshot.
+    meta:
+      external_location: >-
+        read_parquet('{{ env_var('RENTLAB_RAW_DIR', '../data/raw') }}/rentcast/{name}/*/*.parquet',
+        union_by_name = true, hive_partitioning = true)
+    config:
+      loaded_at_field: pulled_at
+      freshness:
+        warn_after: {count: 8, period: day}
+    tables:
+      - name: rental_listings
+      - name: sale_listings
+
+  - name: cook_county
+    description: Cook County Assessor open data (datacatalog.cookcountyil.gov). Full snapshots.
+    meta:
+      external_location: >-
+        read_parquet('{{ env_var('RENTLAB_RAW_DIR', '../data/raw') }}/cook_county/{name}/*/*.parquet',
+        union_by_name = true, hive_partitioning = true)
+    tables:
+      - name: parcel_universe
+      - name: parcel_addresses
+      - name: res_characteristics
+      - name: condo_characteristics
+      - name: parcel_sales
+
+  - name: chicago_portal
+    description: City of Chicago Data Portal (data.cityofchicago.org). Full snapshots.
+    meta:
+      external_location: >-
+        read_parquet('{{ env_var('RENTLAB_RAW_DIR', '../data/raw') }}/chicago_portal/{name}/*/*.parquet',
+        union_by_name = true, hive_partitioning = true)
+    tables:
+      - name: cta_l_stops
+      - name: building_permits
+      - name: crimes
+
+  - name: census
+    meta:
+      external_location: >-
+        read_parquet('{{ env_var('RENTLAB_RAW_DIR', '../data/raw') }}/census/{name}/*/*.parquet',
+        union_by_name = true, hive_partitioning = true)
+    tables:
+      - name: acs5_tract
+
+  - name: zillow
+    meta:
+      external_location: >-
+        read_parquet('{{ env_var('RENTLAB_RAW_DIR', '../data/raw') }}/zillow/{name}/*/*.parquet',
+        union_by_name = true, hive_partitioning = true)
+    tables:
+      - name: zori_zip

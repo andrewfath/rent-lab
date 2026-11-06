@@ -1,0 +1,11 @@
+# One entry per market. Extractors read this; dbt reads the matching
+# dbt/seeds/markets.csv. Adding a city = a new entry here + a seed row +
+# staging models for that city's parcel source.
+markets:
+  chicago:
+    city: Chicago
+    state: IL
+    county_fips: "17031"
+    # min_lon, min_lat, max_lon, max_lat
+    bbox: [-87.94, 41.64, -87.52, 42.03]
+    timezone: America/Chicago

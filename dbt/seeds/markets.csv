@@ -1,0 +1,2 @@
+market_id,city,state,county_fips,min_lon,min_lat,max_lon,max_lat,parcel_id_name
+chicago,Chicago,IL,17031,-87.94,41.64,-87.52,42.03,PIN

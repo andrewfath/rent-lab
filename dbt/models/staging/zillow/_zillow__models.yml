@@ -1,0 +1,8 @@
+version: 2
+
+models:
+  - name: stg_zillow__zori_zip
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [zip_code, month]

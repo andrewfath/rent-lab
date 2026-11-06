@@ -1,0 +1,7 @@
+source_name,source_value,property_type_std
+rentcast,Single Family,single_family
+rentcast,Condo,condo
+rentcast,Townhouse,townhouse
+rentcast,Manufactured,manufactured
+rentcast,Multi-Family,small_multifamily
+rentcast,Apartment,apartment

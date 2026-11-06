@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: dim_neighborhood
+    description: Census tract context (ACS 5-year).
+    columns:
+      - name: tract_geoid
+        data_tests: [unique, not_null]
+
+  - name: fct_rental_observations
+    description: >
+      Completed rental episodes that pass the label rules (ended within
+      max_days_on_market, rent within min_rent..max_rent). Label = last asking rent.
+    columns:
+      - name: episode_key
+        data_tests: [unique, not_null]
+      - name: rent
+        data_tests:
+          - not_null
+          - value_between:
+              arguments: {min_value: 300, max_value: 20000}
+
+  - name: ml_rent_training
+    description: Flat feature table read by ml/. Locked by a contract.
+    config:
+      contract:
+        enforced: true
+    columns:
+      - {name: episode_key, data_type: varchar, constraints: [{type: not_null}],
+         data_tests: [unique]}
+      - {name: market_id, data_type: varchar, constraints: [{type: not_null}]}
+      - {name: listed_date, data_type: date, constraints: [{type: not_null}]}
+      - {name: rent, data_type: double, constraints: [{type: not_null}]}
+      - {name: log_rent, data_type: double, constraints: [{type: not_null}]}
+      - {name: property_type, data_type: varchar, constraints: [{type: not_null}]}
+      - {name: beds, data_type: double, constraints: [{type: not_null}]}
+      - {name: baths, data_type: double}
+      - {name: sqft, data_type: double}
+      - {name: hoa_fee, data_type: double}
+      - {name: building_type, data_type: varchar}
+      - {name: year_built, data_type: integer}
+      - {name: building_units, data_type: integer}
+      - {name: building_sqft, data_type: double}
+      - {name: exterior_wall, data_type: varchar}
+      - {name: central_air, data_type: varchar}
+      - {name: parcel_match_confidence, data_type: double}
+      - {name: lat, data_type: double, constraints: [{type: not_null}]}
+      - {name: lon, data_type: double, constraints: [{type: not_null}]}
+      - {name: zip_code, data_type: varchar}
+      - {name: assessor_nbhd_code, data_type: varchar}
+      - {name: tract_geoid, data_type: varchar}
+      - {name: dist_to_l_station_mi, data_type: double}
+      - {name: crimes_12m, data_type: integer}
+      - {name: permits_36m, data_type: integer}
+      - {name: new_construction_36m, data_type: integer}
+      - {name: tract_median_gross_rent, data_type: double}
+      - {name: tract_median_household_income, data_type: double}
+      - {name: tract_renter_share, data_type: double}
+      - {name: zip_zori, data_type: double}
+      - {name: comp_count, data_type: integer, constraints: [{type: not_null}]}
+      - {name: comp_median_rent, data_type: double}
+      - {name: comp_median_rent_per_sqft, data_type: double}
+      - {name: comp_weighted_rent, data_type: double}
+      - {name: comp_mean_distance_mi, data_type: double}

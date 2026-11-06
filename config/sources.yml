@@ -1,0 +1,125 @@
+# Source settings for extractors. Endpoints and dataset ids live here so a
+# vendor or dataset change is a config edit, not a code change.
+
+rentcast:
+  base_url: https://api.rentcast.io/v1
+  page_size: 500                 # API maximum
+  # Hard monthly cap enforced locally, counted from data/raw/rentcast/_requests.jsonl.
+  # Free plan allows 50/month; we stay well under it until Phase 1 is validated.
+  monthly_request_budget: 20
+  # Default cap per command run (override with --max-requests).
+  default_max_requests_per_run: 5
+  # A query+page already saved within this many days is not requested again.
+  reuse_within_days: 30
+  endpoints:
+    rental_listings: /listings/rental/long-term
+    sale_listings: /listings/sale
+  # Contact details are dropped at extract time; we never need them.
+  drop_fields: [listingAgent, listingOffice]
+  json_fields: [history, builder]
+  expected_fields:
+    - id
+    - formattedAddress
+    - addressLine1
+    - addressLine2
+    - city
+    - state
+    - zipCode
+    - county
+    - latitude
+    - longitude
+    - propertyType
+    - bedrooms
+    - bathrooms
+    - squareFootage
+    - lotSize
+    - yearBuilt
+    - status
+    - price
+    - listingType
+    - listedDate
+    - removedDate
+    - createdDate
+    - lastSeenDate
+    - daysOnMarket
+    - mlsName
+    - mlsNumber
+    - hoa__fee
+    - history
+
+socrata:
+  page_size: 50000
+  # Seconds to wait for one page. A timeout retries with half the page size.
+  read_timeout_seconds: 300
+  # Assessor tables are published by tax year; bump when a newer year is complete.
+  assessor_year: 2025
+  datasets:
+    cook_parcel_universe:
+      domain: datacatalog.cookcountyil.gov
+      dataset_id: pabr-t5kh      # Assessor - Parcel Universe (Current Year Only)
+      select: [pin, pin10, year, class, township_code, nbhd_code, zip_code, lat, lon,
+               census_tract_geoid]
+      # Townships 70-77 make up the City of Chicago
+      where: "township_code in ('70','71','72','73','74','75','76','77')"
+    cook_parcel_addresses:
+      domain: datacatalog.cookcountyil.gov
+      dataset_id: 3723-97qp      # Assessor - Parcel Addresses (owner fields NOT pulled)
+      select: [pin, pin10, year, prop_address_full, prop_address_city_name,
+               prop_address_zipcode_1]
+      where: "year = {assessor_year} and prop_address_city_name = 'CHICAGO'"
+    cook_res_characteristics:
+      domain: datacatalog.cookcountyil.gov
+      dataset_id: x54s-btds      # Assessor - Single and Multi-Family Improvement Characteristics
+      select: [pin, year, card, class, township_code, char_yrblt, char_bldg_sf, char_land_sf,
+               char_beds, char_rooms, char_fbath, char_hbath, char_type_resd, char_apts,
+               char_ext_wall, char_bsmt, char_air, char_gar1_size, char_repair_cnd,
+               char_renovation]
+      where: "year = {assessor_year} and township_code in ('70','71','72','73','74','75','76','77')"
+    cook_condo_characteristics:
+      domain: datacatalog.cookcountyil.gov
+      dataset_id: 3r7i-mrz4      # Assessor - Residential Condominium Unit Characteristics
+      select: [pin, pin10, year, card, class, township_code, char_yrblt, char_building_sf,
+               char_unit_sf, char_bedrooms, char_full_baths, char_half_baths,
+               char_building_pins, bldg_is_mixed_use, is_parking_space, is_common_area]
+      where: "year = {assessor_year} and township_code in ('70','71','72','73','74','75','76','77')"
+    cook_parcel_sales:
+      domain: datacatalog.cookcountyil.gov
+      dataset_id: wvhk-k5uv      # Assessor - Parcel Sales (buyer/seller names NOT pulled)
+      select: [pin, year, township_code, nbhd, class, sale_date, sale_price, doc_no, deed_type,
+               is_multisale, num_parcels_sale, sale_filter_same_sale_within_365,
+               sale_filter_less_than_10k, sale_filter_deed_type]
+      where: "sale_date >= '2015-01-01' and township_code in ('70','71','72','73','74','75','76','77')"
+    chicago_cta_l_stops:
+      domain: data.cityofchicago.org
+      dataset_id: 8pix-ypme      # CTA - System Information - List of 'L' Stops
+      select: [stop_id, station_name, map_id, ada, location]
+    chicago_building_permits:
+      domain: data.cityofchicago.org
+      dataset_id: ydr8-5enu      # Building Permits
+      page_size: 20000
+      select: [id, permit_type, issue_date, reported_cost, latitude, longitude]
+      where: "issue_date >= '2019-01-01'"
+    chicago_crimes:
+      domain: data.cityofchicago.org
+      dataset_id: ijzp-q8t2      # Crimes - 2001 to Present
+      page_size: 10000           # a filtered slice of 8M+ rows: smaller pages answer faster
+      select: [id, date, primary_type, latitude, longitude]
+      where: "date >= '2023-01-01' and latitude is not null"
+
+census:
+  base_url: https://api.census.gov/data
+  acs_year: 2024
+  state_fips: "17"
+  county_fips: "031"
+  variables:
+    B25064_001E: median_gross_rent
+    B25058_001E: median_contract_rent
+    B19013_001E: median_household_income
+    B25003_001E: occupied_units
+    B25003_003E: renter_occupied_units
+
+zillow:
+  # Zillow Observed Rent Index, ZIP level, smoothed, all home types.
+  # If Zillow renames the file, update this URL (see zillow.com/research/data).
+  zori_zip_url: https://files.zillowstatic.com/research/public_csvs/zori/Zip_zori_uc_sfrcondomfr_sm_month.csv
+  metro_contains: Chicago

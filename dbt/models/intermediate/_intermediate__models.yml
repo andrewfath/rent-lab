@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: int_rental_listings
+    description: Latest attributes per rental listing plus weekly-snapshot stats.
+    columns:
+      - name: listing_key
+        data_tests: [unique, not_null]
+
+  - name: int_rental_listing_events
+    description: One row per listing episode, from top-level fields and RentCast history.
+    columns:
+      - name: episode_key
+        data_tests: [unique, not_null]
+      - name: days_listed
+        data_tests:
+          - value_between:
+              arguments: {min_value: 0, max_value: 3650}
+
+  - name: int_parcels
+    description: Parcels with building attributes; condo units carry building totals.
+    columns:
+      - name: parcel_key
+        data_tests: [unique, not_null]
+
+  - name: int_listing_to_parcel
+    description: Listing-to-parcel match with method, level and confidence.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [listing_key, listing_kind]
+    columns:
+      - name: match_method
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [address, nearest, unmatched]
+      - name: match_confidence
+        data_tests:
+          - value_between:
+              arguments: {min_value: 0, max_value: 1}
+
+  - name: int_rental_comps
+    description: Up to comps_max comparables per rental episode, ranked by similarity.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [subject_key, comp_episode_key]
+
+  - name: int_rental_comp_features
+    columns:
+      - name: episode_key
+        data_tests: [unique, not_null]
+
+  - name: int_episode_location_features
+    columns:
+      - name: episode_key
+        data_tests: [unique, not_null]

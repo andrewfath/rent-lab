@@ -1,0 +1,11 @@
+rent_lab:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('RENTLAB_DUCKDB_PATH', '../data/warehouse.duckdb') }}"
+      threads: 4
+    fixtures:
+      type: duckdb
+      path: "{{ env_var('RENTLAB_DUCKDB_PATH', '../data/fixtures.duckdb') }}"
+      threads: 4

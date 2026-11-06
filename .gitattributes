@@ -1,0 +1,4 @@
+# Keep line endings consistent between Windows and CI
+* text=auto eol=lf
+*.parquet binary
+*.duckdb binary

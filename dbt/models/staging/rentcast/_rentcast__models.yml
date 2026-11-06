@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: stg_rentcast__rental_listings
+    description: RentCast long-term rental listings, one row per listing per pull.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [listing_key, pulled_at]
+    columns:
+      - name: listing_key
+        data_tests: [not_null]
+      - name: market_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('markets')
+                field: market_id
+      - name: listing_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [Active, Inactive]
+      - name: rent
+        data_tests:
+          - value_between:
+              arguments: {min_value: 100, max_value: 100000}
+      - name: beds
+        data_tests:
+          - value_between:
+              arguments: {min_value: 0, max_value: 12}
+      - name: lat
+        data_tests:
+          - within_market_bbox
+      - name: property_type_std
+        description: Null means a new RentCast propertyType needs a row in property_type_map.
+        data_tests:
+          - not_null:
+              config: {severity: warn}
+
+  - name: stg_rentcast__sale_listings
+    description: RentCast for-sale listings, one row per listing per pull.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [listing_key, pulled_at]
+    columns:
+      - name: listing_key
+        data_tests: [not_null]
+      - name: list_price
+        data_tests:
+          - value_between:
+              arguments: {min_value: 10000, max_value: 50000000}

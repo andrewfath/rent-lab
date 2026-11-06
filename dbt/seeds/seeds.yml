@@ -1,0 +1,18 @@
+version: 2
+
+seeds:
+  - name: markets
+    description: One row per market. Staging models tag rows with market_id from here.
+    columns:
+      - name: market_id
+        data_tests: [unique, not_null]
+  - name: property_type_map
+    description: Translates each source's property type vocabulary to the canonical one.
+    columns:
+      - name: property_type_std
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [single_family, condo, townhouse, manufactured, small_multifamily,
+                         apartment]

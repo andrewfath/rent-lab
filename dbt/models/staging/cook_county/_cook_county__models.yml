@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: stg_cook_county__parcel_universe
+    description: Chicago parcels from the Assessor Parcel Universe (current year).
+    columns:
+      - name: pin
+        data_tests: [unique, not_null]
+      - name: parcel_key
+        data_tests: [unique, not_null]
+      - name: lat
+        data_tests:
+          - within_market_bbox
+
+  - name: stg_cook_county__parcel_addresses
+    columns:
+      - name: pin
+        data_tests: [unique, not_null]
+
+  - name: stg_cook_county__res_characteristics
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [pin, card]
+    columns:
+      - name: year_built
+        data_tests:
+          - value_between:
+              arguments: {min_value: 1830, max_value: 2030}
+
+  - name: stg_cook_county__condo_characteristics
+    columns:
+      - name: pin
+        data_tests: [unique, not_null]
+
+  - name: stg_cook_county__parcel_sales
+    columns:
+      - name: sale_price
+        data_tests:
+          - value_between:
+              arguments: {min_value: 0, max_value: 1000000000}
